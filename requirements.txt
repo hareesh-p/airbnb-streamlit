@@ -1,10 +1,12 @@
 streamlit
 pandas
 numpy
-scikit-learn
-plotly
 matplotlib
+plotly
 seaborn
+scikit-learn
+xgboost
 nltk
 wordcloud
-textblob
+geopandas
+shapely
