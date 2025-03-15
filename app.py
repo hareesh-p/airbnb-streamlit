@@ -203,7 +203,7 @@ elif page == "Sentiment Analysis":
     st.header(f"💬 Guest Review Analysis for {selected_city.capitalize()}")
 
     # Show word cloud for Airbnb reviews
-    st.subheader("🌥️ Word Cloud of Guest Reviews")
+    st.subheader("🌥️ What people say about us")
     generate_wordcloud(reviews)
 
     # Show sentiment analysis
