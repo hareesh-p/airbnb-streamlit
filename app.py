@@ -7,6 +7,9 @@ from load_data import load_airbnb_data
 from price_prediction import train_price_model
 from sentiment_analysis import generate_wordcloud, analyze_sentiment
 
+# Set page config to include the HTML title
+st.set_page_config(page_title="Airbnb Market Analysis")
+
 # 📍 Available cities
 cities = ["bristol", "geneva", "hague", "hongkong", "singapore"]
 
@@ -23,25 +26,30 @@ with open(geojson_path, "r") as f:
     geojson_data = json.load(f)
 
 # App Title
-st.title(f"🏡 Airbnb Market Analysis for {selected_city.capitalize()}")
+st.title(f"🏠 Airbnb Market Analysis for {selected_city.capitalize()}")
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Exploratory Data Analysis", "Price Analysis", "Price Prediction", "Sentiment Analysis"])
+page = st.sidebar.radio("Go to", ["Exploratory Data Analysis", "Price Analysis", "Price Prediction", "Sentiment Analysis", "View Source Code"])
 
-# 📌 1️⃣ Exploratory Data Analysis (EDA)
-if page == "Exploratory Data Analysis":
+# 📝 View Source Code
+if page == "View Source Code":
+    st.header("View Source Code")
+    st.markdown("[GitHub Repository](https://github.com/hareesh-p/airbnb-streamlit)")
+
+# 📝 1️⃣ Exploratory Data Analysis (EDA)
+elif page == "Exploratory Data Analysis":
     st.header(f"📊 Exploratory Data Analysis (EDA) - {selected_city.capitalize()}")
 
-    # 📌 Dataset Overview
+    # 📝 Dataset Overview
     st.subheader("🔍 Dataset Overview")
     st.write(f"Total Listings: {listings.shape[0]}")
     st.write(f"Total Columns: {listings.shape[1]}")
     st.write("Preview of the Dataset:")
     st.dataframe(listings.head())
 
-    # 📌 Missing Values Summary
-    st.subheader("🛑 Missing Values in Dataset")
+    # 📝 Missing Values Summary
+    st.subheader("🚨 Missing Values in Dataset")
     missing_values = listings.isnull().sum()
     missing_values = missing_values[missing_values > 0].sort_values(ascending=False)
     if not missing_values.empty:
@@ -49,7 +57,7 @@ if page == "Exploratory Data Analysis":
     else:
         st.write("✅ No missing values in the dataset.")
 
-    # 📌 Summary Statistics (Excluding Non-Informative Fields)
+    # 📝 Summary Statistics (Excluding Non-Informative Fields)
     st.subheader("📈 Summary Statistics")
     excluded_columns = ["id", "listing_url", "scrape_id", "host_id", "host_url", "picture_url"]
     numeric_cols = listings.select_dtypes(include=["number", "float", "int"]).columns
@@ -60,22 +68,22 @@ if page == "Exploratory Data Analysis":
     else:
         st.write("⚠️ No relevant numeric features for summary statistics.")
 
-    # 📌 Price Distribution
-    st.subheader("💰 Price Distribution")
+    # 📝 Price Distribution Across Listings
+    st.subheader("💰 Price Distribution Across Listings")
     fig = px.histogram(listings, x="price", nbins=50, title="Price Distribution Across Listings")
     st.plotly_chart(fig)
 
-# 📌 2️⃣ Price Analysis Page
+# 📝 2️⃣ Price Analysis Page
 elif page == "Price Analysis":
     st.header(f"📊 Airbnb Price Analysis in {selected_city.capitalize()}")
 
-    # 📌 Properties Count by Neighborhood
+    # 📝 Properties Count by Neighborhood
     st.subheader("🏘️ Properties Count by Neighborhood")
     neighborhood_counts = listings["neighbourhood_cleansed"].value_counts().reset_index()
     neighborhood_counts.columns = ["Neighborhood", "Property Count"]
     st.dataframe(neighborhood_counts)
 
-    # 📌 Option to View All Properties
+    # 📝 Option to View All Properties
     show_all = st.checkbox("Show all properties")
     if show_all:
         st.write("Displaying all properties in the dataset:")
@@ -88,22 +96,23 @@ elif page == "Price Analysis":
         avg_price = listings[listings["neighbourhood_cleansed"] == neighborhood]["price"].mean()
         st.write(f"**Average Price in {neighborhood}:** ${avg_price:.2f}")
 
-        # Show Price Distribution
-        fig = px.histogram(listings[listings["neighbourhood_cleansed"] == neighborhood], x="price", nbins=50, title="Price Distribution")
+        # Show Price Distribution in Selected Neighborhood
+        st.subheader(f"💰 Price Distribution in {neighborhood}")
+        fig = px.histogram(listings[listings["neighbourhood_cleansed"] == neighborhood], x="price", nbins=50, title=f"Price Distribution in {neighborhood}")
         st.plotly_chart(fig)
 
-    # 📌 Price Distribution Visualization
-    st.subheader("📊 Price Distribution Across Listings")
-    fig = px.histogram(listings, x="price", nbins=50, title="Distribution of Airbnb Prices")
+    # 📝 Overall Price Distribution Visualization
+    st.subheader("📊 Overall Price Distribution Across Listings")
+    fig = px.histogram(listings, x="price", nbins=50, title="Overall Distribution of Airbnb Prices")
     st.plotly_chart(fig)
 
-    # 📌 Average Price by Room Type
+    # 📝 Average Price by Room Type
     st.subheader("🏠 Average Price by Room Type")
     avg_price_room_type = listings.groupby("room_type")["price"].mean().reset_index()
     fig = px.bar(avg_price_room_type, x="room_type", y="price", title="Average Price by Room Type")
     st.plotly_chart(fig)
 
-    # 📌 Map Visualization Toggle
+    # 📝 Map Visualization Toggle
     st.subheader("🗺️ Map Visualization")
     map_option = st.radio("Choose Map Type", ["Scatter Map (Price Distribution)", "Choropleth (Average Price)"])
 
@@ -136,14 +145,14 @@ elif page == "Price Analysis":
         )
         st.plotly_chart(fig)
 
-# 📌 3️⃣ Price Prediction Page
+# 📝 3️⃣ Price Prediction Page
 elif page == "Price Prediction":
     st.header(f"📈 Predict Airbnb Prices in {selected_city.capitalize()}")
 
     # Train price model and get dynamic features
-    model, performance_df, selected_features, feature_importance, scaler, numerical_features = train_price_model(listings)
+    model, performance_df, selected_features, feature_importance, scaler, available_numerical, available_categorical = train_price_model(listings)
 
-    # 📌 Display Model Performance Comparison
+    # 📝 Display Model Performance Comparison
     st.subheader("📊 Model Performance Comparison")
     st.dataframe(performance_df)
 
@@ -151,10 +160,21 @@ elif page == "Price Prediction":
     best_model_name = performance_df["R² Score"].idxmax()
     st.write(f"🏆 **Best Performing Model:** {best_model_name}")
 
-    # 📌 Dynamically create user inputs
+    # 📝 Dynamically create user inputs
     user_inputs = {}
-    for feature in numerical_features:
-        user_inputs[feature] = st.number_input(f"Enter {feature.replace('_', ' ').title()}", min_value=0, max_value=100, value=2)
+    for feature in available_numerical:
+        # Determine the input type based on feature name
+        if feature in ["accommodates", "bedrooms", "bathrooms"]:
+            user_inputs[feature] = st.number_input(f"Enter {feature.replace('_', ' ').title()}", min_value=0, max_value=100, value=2, step=1)
+        elif feature == "number_of_reviews":
+            user_inputs[feature] = st.number_input(f"Enter {feature.replace('_', ' ').title()}", min_value=0, value=0, step=1)
+        else:
+            user_inputs[feature] = st.number_input(f"Enter {feature.replace('_', ' ').title()}", min_value=0.0, value=0.0, step=0.1, format="%.1f")
+
+    for feature in available_categorical:
+        if feature in listings.columns:
+            options = sorted(listings[feature].dropna().unique())
+            user_inputs[feature] = st.selectbox(f"Select {feature.replace('_', ' ').title()}", options)
 
     # Convert user input into DataFrame
     input_data = pd.DataFrame([user_inputs])
@@ -163,13 +183,22 @@ elif page == "Price Prediction":
     input_data = input_data.reindex(selected_features, axis=1, fill_value=0)
 
     # Normalize numerical features
-    input_data[numerical_features] = scaler.transform(input_data[numerical_features])
+    input_data[available_numerical] = scaler.transform(input_data[available_numerical])
 
     # Predict price
     predicted_price = model.predict(input_data)[0]
     st.write(f"**Predicted Price:** ${predicted_price:.2f}")
 
-# 📌 4️⃣ Sentiment Analysis Page
+    # Plot feature importance
+    st.subheader("🔑 Feature Importances")
+    plt.figure(figsize=(10, 6))
+    plt.barh(feature_importance["Feature"].head(10), feature_importance["Importance"].head(10), color='skyblue')
+    plt.xlabel('Importance')
+    plt.ylabel('Feature')
+    plt.title('Top 10 Feature Importances')
+    st.pyplot(plt)
+
+# 📝 4️⃣ Sentiment Analysis Page
 elif page == "Sentiment Analysis":
     st.header(f"💬 Guest Review Analysis for {selected_city.capitalize()}")
 

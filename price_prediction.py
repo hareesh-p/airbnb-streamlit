@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error
 from xgboost import XGBRegressor
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def train_price_model(listings, top_n=10):
     """ Train multiple models with feature selection, hyperparameter tuning, and outlier removal """
@@ -82,7 +84,7 @@ def train_price_model(listings, top_n=10):
     X_train_selected = X_train[selected_features]
     X_test_selected = X_test[selected_features]
 
-    # 📌 Hyperparameter Tuning for Random Forest
+    # 📍 Hyperparameter Tuning for Random Forest
     rf_param_grid = {
         "n_estimators": [100, 200, 300],
         "max_depth": [10, 20, 30, None],
@@ -93,7 +95,7 @@ def train_price_model(listings, top_n=10):
     rf_search.fit(X_train_selected, y_train)
     tuned_rf = rf_search.best_estimator_
 
-    # 📌 Hyperparameter Tuning for XGBoost
+    # 📍 Hyperparameter Tuning for XGBoost
     xgb_param_grid = {
         "n_estimators": [100, 200, 300],
         "learning_rate": [0.01, 0.1, 0.2],
@@ -105,7 +107,7 @@ def train_price_model(listings, top_n=10):
     xgb_search.fit(X_train_selected, y_train)
     tuned_xgb = xgb_search.best_estimator_
 
-    # 📌 Train and Compare Tuned Models
+    # 📍 Train and Compare Tuned Models
     models = {
         "Random Forest (Tuned)": tuned_rf,
         "XGBoost (Tuned)": tuned_xgb
@@ -137,4 +139,4 @@ def train_price_model(listings, top_n=10):
     # Convert performance dictionary to DataFrame
     performance_df = pd.DataFrame(model_performance).T
 
-    return best_model, performance_df, selected_features, feature_importance, scaler, available_numerical
+    return best_model, performance_df, selected_features, feature_importance, scaler, available_numerical, available_categorical

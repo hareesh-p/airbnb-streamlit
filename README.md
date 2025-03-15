@@ -33,7 +33,7 @@ It supports five cities: Bristol, Geneva, Hague, Hong Kong, and Singapore.
 The app enables:  
 - Data exploration with summary statistics and missing values handling.  
 - Airbnb price trend analysis through visualizations.  
-- Machine Learning-powered price prediction using dynamic feature selection.  
+- Machine Learning-powered price prediction using handpicked features based on feature importance.  
 - Sentiment analysis on guest reviews.  
 - Geo-visualizations for property mapping.  
 
@@ -74,6 +74,18 @@ Key attributes:
 - `latitude` & `longitude`: Geo-coordinates for mapping.
 - `number_of_reviews`: Count of guest reviews.
 - `review_scores_rating`: Overall rating of the listing.
+- **Predictors used for price prediction**:
+  - `accommodates`: Number of people the listing accommodates.
+  - `bedrooms`: Number of bedrooms in the listing.
+  - `bathrooms`: Number of bathrooms in the listing.
+  - `number_of_reviews`: Count of guest reviews.
+  - `review_scores_rating`: Overall rating of the listing.
+  - `review_scores_value`: Value rating of the listing.
+  - `room_type`: Type of Airbnb accommodation (Entire home, Private room, etc.).
+  - `neighbourhood_cleansed`: Cleaned version of the neighborhood name.
+  - `property_type`: Type of property (Apartment, House, etc.).
+  - `instant_bookable`: Whether the listing is instantly bookable.
+  - `host_is_superhost`: Whether the host is a superhost.
 
 ---
 
@@ -107,15 +119,15 @@ The app has four main sections:
 - Visualizes price distribution and room type proportions.
 
 ### Price Analysis
-- Price trends across different neighborhoods.
-- Neighborhood filtering to analyze pricing in specific areas.
+- **Overall Price Distribution**: Analyzes the price distribution across all listings in the selected city.
+- **Neighborhood Price Distribution**: Analyzes price trends within specific neighborhoods.
 - Maps & Visualizations:
   - Scatter Map: Displays individual property prices.
   - Choropleth Map: Shows average price per neighborhood.
 
 ### Price Prediction
 - Uses Random Forest & XGBoost models to predict Airbnb prices.
-- Automatically selects the best features for prediction.
+- Handpicked the best features based on feature importance for prediction.
 - Compares models using R² Score and RMSE.
 - Users input listing details to get a predicted price.
 
@@ -137,7 +149,7 @@ The app has four main sections:
 1. Handles missing values, outliers, and normalizes numerical data.
 2. Uses Random Forest & XGBoost for predictions.
 3. Feature Selection:
-   - Selects top 10 important features dynamically per city.
+   - Handpicks top important features based on feature importance.
    - Ensures categorical variables (e.g., `property_type`) are included.
    - Removes outliers using Interquartile Range (IQR).
 4. Hyperparameter Tuning:
@@ -149,4 +161,4 @@ The app has four main sections:
 ## License & Acknowledgments
 This project is for educational and analytical purposes only.  
 Data Source: [Inside Airbnb](https://insideairbnb.com/)  
-Contributors: Sumit Kumar(EMBADTA24013), Hareesh P(EMBADTA24015), Abhishek Mishra(EMBADTA24016)  
+Contributors: Sumit Kumar(EMBADTA24013), Hareesh P(EMBADTA24015), Abhishek Mishra(EMBADTA24016)

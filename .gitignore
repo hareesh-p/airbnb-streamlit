@@ -10,7 +10,8 @@ __pycache__/
 .venv/
 venv/
 *.env
-
+# Ignore the Debug Notebook
+sentiment.ipynb
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
